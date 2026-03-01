@@ -366,6 +366,7 @@ namespace WinSW
             string? stopArguments = this.config.StopArguments;
             if (stopExecutable is null && stopArguments is null)
             {
+                this.process.StopDescendants(this.config.StopTimeoutInMs);
                 var process = this.process;
                 Log.Debug("ProcessKill " + process.Id);
                 bool? result = process.Stop(this.config.StopTimeoutInMs);
@@ -375,7 +376,6 @@ namespace WinSW
                     false => "terminated.",
                     null => $"finished with code '{process.ExitCode}'."
                 });
-                this.process.StopDescendants(this.config.StopTimeoutInMs);
                 this.ExtensionManager.FireOnProcessTerminated(process);
             }
             else

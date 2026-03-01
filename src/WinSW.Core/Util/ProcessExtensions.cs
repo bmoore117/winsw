@@ -17,8 +17,6 @@ namespace WinSW.Util
 
         public static void StopTree(this Process process, int millisecondsTimeout)
         {
-            StopPrivate(process, millisecondsTimeout);
-
             foreach (var child in GetChildren(process))
             {
                 using (child.Process)
@@ -27,6 +25,8 @@ namespace WinSW.Util
                     StopTree(child.Process, millisecondsTimeout);
                 }
             }
+
+            StopPrivate(process, millisecondsTimeout);
         }
 
         internal static void StopDescendants(this Process process, int millisecondsTimeout)
@@ -173,7 +173,15 @@ namespace WinSW.Util
             {
                 if (process.WaitForExit(millisecondsTimeout))
                 {
-                    Log.Debug($"Process '{process.Format()}' canceled with code {process.ExitCode}.");
+                    try
+                    {
+                        Log.Debug($"Process '{process.Format()}' canceled with code {process.ExitCode}.");
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        Log.Debug($"Process '{process.Format()}' exited.");
+                    }
+
                     return;
                 }
             }
